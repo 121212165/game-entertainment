@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+
+# Build outputs
+.next/
+dist/
+build/
+out/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Temp files
+tmpclaude-*
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
