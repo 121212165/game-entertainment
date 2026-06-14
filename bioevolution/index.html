@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光与影：物种摇篮</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'Segoe UI', sans-serif; background: linear-gradient(to bottom, #f8f9fa, #e9ecef); min-height: 100vh; padding: 20px; }
+h1 { text-align: center; font-size: 2em; color: #333; margin-bottom: 4px; }
+.subtitle { text-align: center; color: #666; margin-bottom: 20px; }
+.layout { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; }
+.main-col { flex: 2; }
+.side-col { flex: 1; }
+.card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 16px; margin-bottom: 16px; }
+.card h3 { font-size: 1em; color: #333; margin-bottom: 12px; }
+canvas#world { display: block; border: 1px solid #ddd; border-radius: 4px; cursor: crosshair; }
+.controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.btn { padding: 8px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; color: #fff; transition: opacity 0.2s; }
+.btn:hover { opacity: 0.85; }
+.btn-green { background: #28a745; }
+.btn-yellow { background: #ffc107; color: #333; }
+.btn-blue { background: #007bff; }
+.btn-red { background: #dc3545; }
+.speed-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.speed-row label { font-size: 13px; color: #555; }
+.speed-row input[type=range] { flex: 1; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-box { background: #f8f9fa; padding: 8px 12px; border-radius: 6px; font-size: 13px; }
+.stat-box .val { font-weight: 700; }
+.status-running { color: #28a745; }
+.status-paused { color: #ffc107; }
+.pop-chart, .evo-chart { width: 100%; height: 200px; }
+.tooltip { position: fixed; background: #fff; padding: 10px 14px; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); font-size: 12px; line-height: 1.6; pointer-events: none; z-index: 100; display: none; max-width: 300px; border: 1px solid #eee; }
+footer { text-align: center; color: #999; font-size: 12px; margin-top: 20px; }
+@media (max-width: 800px) { .layout { flex-direction: column; } }
+</style>
+</head>
+<body>
+<h1>光与影：物种摇篮</h1>
+<p class="subtitle">人工生命演化模拟器 - 探索环境印记与遗传适应的奥秘</p>
+
+<div class="layout">
+  <div class="main-col">
+    <div class="card">
+      <canvas id="world"></canvas>
+    </div>
+    <div class="card">
+      <h3>控制面板</h3>
+      <div class="controls">
+        <button id="btnToggle" class="btn btn-green">继续</button>
+        <button id="btnStep" class="btn btn-blue">单步执行</button>
+        <button id="btnReset" class="btn btn-red">重置世界</button>
+      </div>
+      <div class="speed-row">
+        <label>模拟速度</label>
+        <input id="speedSlider" type="range" min="1" max="10" value="1">
+        <span id="speedVal">1x</span>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box">状态: <span id="statusText" class="status-paused">已暂停</span></div>
+        <div class="stat-box">步数: <span id="stepCount" class="val">0</span></div>
+        <div class="stat-box">光能体: <span id="glimmerCount" class="val">0</span></div>
+        <div class="stat-box">暗影体: <span id="gloomerCount" class="val">0</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="side-col">
+    <div class="card">
+      <h3>种群动态</h3>
+      <canvas id="popChart" class="pop-chart" width="400" height="200"></canvas>
+    </div>
+    <div class="card">
+      <h3>属性演化趋势</h3>
+      <canvas id="evoChart" class="evo-chart" width="400" height="200"></canvas>
+    </div>
+  </div>
+</div>
+
+<footer>Vanilla JS + Canvas | 零依赖 | 实时数据可视化</footer>
+
+<script src="js/types.js"></script>
+<script src="js/core.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

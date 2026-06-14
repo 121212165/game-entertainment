@@ -1,55 +1,51 @@
-# -003Youxilequ
+# game-entertainment
 
-游戏娱乐项目
-
----
-
-## 30 秒了解这个项目
-
-| 维度 | 内容 |
-|------|------|
-| 项目类型 | 游戏/娱乐 |
-| 技术栈 | TypeScript + Node.js |
-| 核心功能 | 游戏娱乐项目 |
-| 适用场景 | 个人学习、原型验证、工具辅助 |
+游戏娱乐项目合集
 
 ---
 
-## 30-Second Project Overview
+## 项目
 
-| Dimension | Content |
-|------|------|
-| Project Type | Game/Entertainment |
-| Tech Stack | TypeScript + Node.js |
-| Core Function | 游戏娱乐项目 |
-| Use Cases | Learning, prototyping, tool assistance |
-
----
+| 项目 | 说明 | 技术栈 | LOC |
+|------|------|--------|-----|
+| **BioEvolution** | 人工生命演化模拟器 — 光能体 vs 暗影体 | Vanilla JS + Canvas | ~950 |
+| **SiLeMa** | 每日签到保平安 — 连续2天未签到自动通知 | Single HTML + localStorage | ~200 |
 
 ## 快速开始
 
-```bash
-# Python
-pip install -r requirements.txt && python app.py
+### BioEvolution
 
-# Node.js
-npm install && npm start
+```bash
+# 直接打开
+start bioevolution/index.html
 ```
+
+### SiLeMa
+
+```bash
+# 直接打开
+start silema.html
+```
+
+零依赖，零构建，浏览器直接运行。
 
 ---
 
 ## 项目结构
+
 ```
-├── src/          # 源代码
-├── tests/        # 测试
-└── README.md     # 项目说明
+├── bioevolution/          # 生物演化模拟器
+│   ├── index.html         # 入口页面
+│   └── js/
+│       ├── types.js       # 类型常量
+│       ├── core.js        # 环境 + 生物逻辑
+│       ├── renderer.js    # Canvas 渲染 + 图表
+│       └── main.js        # 应用入口
+├── silema.html            # 死了么 — 签到应用（单文件）
+├── RECONSTRUCTION-PLAN.md # 重构计划
+└── FIRST-PRINCIPLES-RECONSTRUCTION.md # 第一性原理分析
 ```
 
 ---
 
-## 许可证
-MIT License
-
----
-*最后更新: 2026-05-23*
-*作者: 121212165*
+*最后更新: 2026-06-14*

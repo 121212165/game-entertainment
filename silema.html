@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>死了么 - 每日签到保平安</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.container { background: #fff; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 420px; width: 100%; overflow: hidden; }
+.header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 30px; text-align: center; }
+.header h1 { font-size: 1.8em; margin-bottom: 4px; }
+.header p { opacity: 0.85; font-size: 0.9em; }
+.body { padding: 30px; }
+.alert { background: #fff3cd; border-left: 4px solid #ffc107; padding: 14px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; display: none; }
+.alert.active { display: block; }
+.alert b { color: #856404; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600; }
+.form-group input { width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; transition: border-color 0.2s; }
+.form-group input:focus { outline: none; border-color: #667eea; }
+.btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(102,126,234,0.4); }
+.btn-checkin { background: linear-gradient(135deg, #00b09b, #96c93d); color: #fff; font-size: 20px; padding: 20px; }
+.btn-checkin:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(0,176,155,0.4); }
+.btn-checkin:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+.info { text-align: center; margin-top: 16px; font-size: 13px; color: #888; }
+.info b { color: #333; }
+.status-bar { display: flex; justify-content: space-between; padding: 12px 20px; background: #f8f9fa; border-top: 1px solid #eee; font-size: 12px; color: #666; }
+.hidden { display: none; }
+.streak { text-align: center; font-size: 14px; color: #28a745; margin-top: 10px; }
+.streak b { font-size: 18px; }
+.email-preview { background: #f8f9fa; border-radius: 8px; padding: 14px; margin-top: 16px; font-size: 12px; color: #666; line-height: 1.6; }
+.email-preview b { color: #333; }
+.footer { text-align: center; padding: 14px; font-size: 11px; color: #aaa; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🔔 死了么</h1>
+    <p>每日签到，证明你还活着</p>
+  </div>
+
+  <div class="body">
+    <!-- Registration -->
+    <div id="registerView">
+      <p style="text-align:center;color:#666;margin-bottom:20px;font-size:14px;">输入你的信息和紧急联系人邮箱。<br>如果你连续2天没签到，我们会通知TA。</p>
+      <div class="form-group">
+        <label>你的姓名</label>
+        <input id="inputName" type="text" placeholder="张三">
+      </div>
+      <div class="form-group">
+        <label>紧急联系人邮箱</label>
+        <input id="inputEmail" type="email" placeholder="friend@example.com">
+      </div>
+      <button class="btn btn-primary" onclick="App.register()">注册</button>
+    </div>
+
+    <!-- Check-in -->
+    <div id="checkinView" class="hidden">
+      <div id="alertBox" class="alert"></div>
+      <p class="info">你好，<b id="displayName"></b></p>
+      <div style="margin-top:20px;">
+        <button id="btnCheckin" class="btn btn-checkin" onclick="App.checkin()">✋ 今日签到</button>
+      </div>
+      <div id="streakInfo" class="streak"></div>
+      <div id="lastCheckin" class="info" style="margin-top:12px;"></div>
+      <div id="emailPreview" class="email-preview hidden"></div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <span id="statusLeft"></span>
+    <span id="statusRight"></span>
+  </div>
+  <div class="footer">
+    <a href="#" onclick="App.logout();return false;" style="color:#aaa;">退出登录</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'silema_data';
+
+function getData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null; } catch { return null; }
+}
+function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+function today() { return new Date().toISOString().split('T')[0]; }
+function daysBetween(d1, d2) {
+  return Math.floor((new Date(d2) - new Date(d1)) / 86400000);
+}
+
+const App = {
+  init() {
+    const data = getData();
+    if (data && data.name) {
+      this.showCheckin(data);
+    } else {
+      this.showRegister();
+    }
+  },
+
+  showRegister() {
+    document.getElementById('registerView').classList.remove('hidden');
+    document.getElementById('checkinView').classList.add('hidden');
+  },
+
+  showCheckin(data) {
+    document.getElementById('registerView').classList.add('hidden');
+    document.getElementById('checkinView').classList.remove('hidden');
+    document.getElementById('displayName').textContent = data.name;
+
+    const lastDate = data.lastCheckin;
+    const todayDate = today();
+    const daysSince = lastDate ? daysBetween(lastDate, todayDate) : 999;
+
+    // Alert
+    const alertBox = document.getElementById('alertBox');
+    if (daysSince >= 2) {
+      alertBox.classList.add('active');
+      alertBox.innerHTML = `<b>⚠️ 你已经 ${daysSince} 天没签到了！</b><br>你的紧急联系人 <b>${data.email}</b> 将收到提醒邮件。`;
+      this._showEmailPreview(data, daysSince);
+    } else {
+      alertBox.classList.remove('active');
+      document.getElementById('emailPreview').classList.add('hidden');
+    }
+
+    // Already checked in today?
+    const btn = document.getElementById('btnCheckin');
+    if (lastDate === todayDate) {
+      btn.disabled = true;
+      btn.textContent = '✅ 今日已签到';
+    } else {
+      btn.disabled = false;
+      btn.textContent = '✋ 今日签到';
+    }
+
+    // Streak
+    const streak = this._calcStreak(data);
+    document.getElementById('streakInfo').innerHTML = streak > 0 ? `🔥 连续签到 <b>${streak}</b> 天` : '';
+
+    // Last checkin
+    document.getElementById('lastCheckin').textContent = lastDate
+      ? `上次签到: ${lastDate}`
+      : '从未签到';
+
+    // Status bar
+    document.getElementById('statusLeft').textContent = `共签到 ${data.checkins ? data.checkins.length : 0} 次`;
+    document.getElementById('statusRight').textContent = `注册于 ${data.registeredAt || '未知'}`;
+  },
+
+  register() {
+    const name = document.getElementById('inputName').value.trim();
+    const email = document.getElementById('inputEmail').value.trim();
+    if (!name) { alert('请输入姓名'); return; }
+    if (!email || !email.includes('@')) { alert('请输入有效邮箱'); return; }
+
+    const data = {
+      name,
+      email,
+      registeredAt: today(),
+      lastCheckin: null,
+      checkins: []
+    };
+    saveData(data);
+    this.showCheckin(data);
+  },
+
+  checkin() {
+    const data = getData();
+    if (!data) return;
+    const todayDate = today();
+    if (data.lastCheckin === todayDate) return;
+
+    data.lastCheckin = todayDate;
+    if (!data.checkins) data.checkins = [];
+    data.checkins.push(todayDate);
+    saveData(data);
+    this.showCheckin(data);
+  },
+
+  logout() {
+    if (confirm('确定退出？数据将保留在本机。')) {
+      localStorage.removeItem(STORAGE_KEY);
+      this.showRegister();
+    }
+  },
+
+  _calcStreak(data) {
+    if (!data.checkins || data.checkins.length === 0) return 0;
+    const sorted = [...data.checkins].sort().reverse();
+    let streak = 0;
+    let expected = today();
+    for (const d of sorted) {
+      if (d === expected) {
+        streak++;
+        const prev = new Date(expected);
+        prev.setDate(prev.getDate() - 1);
+        expected = prev.toISOString().split('T')[0];
+      } else break;
+    }
+    return streak;
+  },
+
+  _showEmailPreview(data, days) {
+    const el = document.getElementById('emailPreview');
+    el.classList.remove('hidden');
+    el.innerHTML = `
+      <b>📧 邮件预览（发送给 ${data.email}）：</b><br><br>
+      主题: 【重要通知】您的朋友可能需要关注<br><br>
+      您好，您的朋友 <b>${data.name}</b> 已经连续 <b>${days}</b> 天未签到。<br>
+      最后签到时间: ${data.lastCheckin || '从未签到'}<br><br>
+      建议您尝试联系 ${data.name} 确认安全。<br>
+      <br>
+      <i>（实际部署时需接入邮件服务如 Resend/SendGrid）</i>
+    `;
+  }
+};
+
+window.addEventListener('DOMContentLoaded', () => App.init());
+</script>
+</body>
+</html>
